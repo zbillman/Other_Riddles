@@ -130,7 +130,7 @@ $(document).ready(function () {
 
 <div id="the-scenario" class="section level1">
 <h1>The Scenario</h1>
-<p>At 9:18 seconds in this youtube video <a href="https://youtu.be/FcabbroD2mE?t=558" class="uri">https://youtu.be/FcabbroD2mE?t=558</a> the opponent casts a Holy Wrath which sends out 8 bolts that can hit any opposing character. For our hero to win, he needs it to miss his Hellfiend, which has 5 HP. His hero has 24, and his Lakkari Felhound has 8 HP. This is very unlikely, right? Let’s run a simulation to find out just how unlikely it is!</p>
+<p>At 9:18 seconds in this youtube video <a href="https://youtu.be/FcabbroD2mE?t=558" class="uri">https://youtu.be/FcabbroD2mE?t=558</a> the opponent casts a Holy Wrath which sends out 8 bolts that can hit any opposing character. For our hero to win, he needs it to miss his Hellfiend, which has 5 HP. His hero has 24, and his Lakkari Felhound has 6 HP. This is very unlikely, right? Let’s run a simulation to find out just how unlikely it is!</p>
 <p>I am using the video <a href="https://www.youtube.com/watch?v=pBGMt28xgvk" class="uri">https://www.youtube.com/watch?v=pBGMt28xgvk</a> as a guide to help me create this simulation. If I struggle too much I’ll give up lol, but I think this is a decent place to start.</p>
 </div>
 <div id="simulation" class="section level1">
@@ -151,7 +151,7 @@ $(document).ready(function () {
 #Every row of the matrix is a run of the simulation
 #Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
 
-repeats &lt;- 1e6L
+repeats &lt;- 1.5e6L
 
 m &lt;- matrix(0L, nrow = repeats, ncol = 3L)
 
@@ -163,13 +163,14 @@ for (trials in 1:repeats){
 }
 
 #Put that matrix m into a tibble so we can summarize it and also remove all of the outcomes that aren't possible
-#i.e. all outcomes where Hellfiend takes more than 5 damage
+#i.e. all outcomes where Hellfiend takes more than 5 damage or the Lakkari Felhound takes more than 6
+
 mtibble &lt;- m %&gt;%
   as_tibble(m) %&gt;%
   rename(&quot;Hellfiend&quot; = &quot;V1&quot;,
          &quot;Lakkari_Felhound&quot; = &quot;V2&quot;,
          &quot;Hero&quot; = &quot;V3&quot;) %&gt;%
-  filter(Hellfiend &lt;= 5)</code></pre>
+  filter(Hellfiend &lt;= 5 &amp; Lakkari_Felhound &lt;= 6)</code></pre>
 <pre><code>## Warning in if (validate) {: the condition has length &gt; 1 and only the first
 ## element will be used</code></pre>
 <pre class="r"><code>summarize(mtibble,
@@ -177,8 +178,8 @@ mtibble &lt;- m %&gt;%
 <pre><code>## # A tibble: 1 x 1
 ##   `mean(Hellfiend == 0)`
 ##                    &lt;dbl&gt;
-## 1                 0.0397</code></pre>
-<p>Looks like there was ~4.% chance of that happening. Quite lucky!</p>
+## 1                 0.0385</code></pre>
+<p>Looks like there was ~3.85% chance of that happening. Quite lucky!</p>
 </div>
 
 
