@@ -144,7 +144,7 @@ $(document).ready(function () {
 #Every row of the matrix is a run of the simulation
 #Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
 
-repeats &lt;- 1000L
+repeats &lt;- 1.5e6L
 
 m &lt;- matrix(0L, nrow = repeats, ncol = 3L)
 
@@ -171,7 +171,10 @@ mtibble &lt;- m %&gt;%
 <pre><code>## # A tibble: 1 x 1
 ##   `mean(Hellfiend == 0)`
 ##                    &lt;dbl&gt;
-## 1                 0.0276</code></pre>
+## 1                 0.0385</code></pre>
+</div>
+<div id="result" class="section level1">
+<h1>Result</h1>
 <p>Looks like there was ~3.85% chance of that happening. Quite lucky!</p>
 </div>
 

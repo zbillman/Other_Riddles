@@ -39,7 +39,7 @@ library(tidyverse)
 #Every row of the matrix is a run of the simulation
 #Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
 
-repeats <- 1000L
+repeats <- 1.5e6L
 
 m <- matrix(0L, nrow = repeats, ncol = 3L)
 
@@ -72,6 +72,9 @@ summarize(mtibble,
     ## # A tibble: 1 x 1
     ##   `mean(Hellfiend == 0)`
     ##                    <dbl>
-    ## 1                 0.0358
+    ## 1                 0.0382
+
+Result
+======
 
 Looks like there was ~3.85% chance of that happening. Quite lucky!
