@@ -72,6 +72,6 @@ summarize(mtibble,
     ## # A tibble: 1 x 1
     ##   `mean(Hellfiend == 0)`
     ##                    <dbl>
-    ## 1                 0.0384
+    ## 1                 0.0388
 
 Looks like there was ~3.85% chance of that happening. Quite lucky!
