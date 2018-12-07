@@ -1,0 +1,57 @@
+---
+title: "2018-12-07 Hearthstone Probability"
+author: "zpb"
+date: "December 7, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#The Scenario
+
+At 9:18 seconds in this youtube video https://youtu.be/FcabbroD2mE?t=558 the opponent casts a Holy Wrath which sends out 8 bolts that can hit any opposing character. For our hero to win, he needs it to miss his Hellfiend, which has 5 HP. His hero has 24, and his Lakkari Felhound has 8 HP. This is very unlikely, right? Let's run a simulation to find out just how unlikely it is!
+
+I am using the video https://www.youtube.com/watch?v=pBGMt28xgvk as a guide to help me create this simulation. If I struggle too much I'll give up lol, but I think this is a decent place to start.
+
+#Simulation
+There is something beneficial to this simulation, in that we don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get because it has 8 health! Similarly with the hero having >8 health. Thank god.
+
+This one is probably just a bit off mathematically because it is including the cases where more than 5 bolts hit the Hellfiend. This is extremely unlikely so I guess I'm just going to ignore these cases.
+
+Using summarize(mtibble, mean(Hellfiend >= 6)) these are 1.97% of cases. Not completely insignificant. 
+```{r}
+library(tidyverse)
+
+#Column 1 is the Hellfiend, Column 2 is the Lakkari Felhound, Column 3 is the hero
+#Every row of the matrix is a run of the simulation
+#Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
+
+repeats <- 1e6L
+
+m <- matrix(0L, nrow = repeats, ncol = 3L)
+
+for (trials in 1:repeats){
+  for (j in 1:8) {
+    target <- sample(3, 1)
+    m[trials, target] <- m[trials, target] + 1L
+  }
+}
+
+#Put that matrix m into a tibble so we can summarize it and also remove all of the outcomes that aren't possible
+#i.e. all outcomes where Hellfiend takes more than 5 damage
+mtibble <- m %>%
+  as_tibble(m) %>%
+  rename("Hellfiend" = "V1",
+         "Lakkari_Felhound" = "V2",
+         "Hero" = "V3") %>%
+  filter(Hellfiend <= 5)
+
+summarize(mtibble,
+          mean(Hellfiend == 0))
+```
+
+Looks like there was ~4.% chance of that happening. Quite lucky!
