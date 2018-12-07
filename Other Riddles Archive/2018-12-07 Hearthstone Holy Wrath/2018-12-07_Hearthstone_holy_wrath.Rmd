@@ -3,8 +3,10 @@ title: "2018-12-07 Hearthstone Probability"
 author: "zpb"
 date: "December 7, 2018"
 output:
-  html_document:
-    keep_md: TRUE
+  github_document: default
+  html_document: default
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all") })
 editor_options: 
   chunk_output_type: console
 ---
@@ -31,7 +33,7 @@ library(tidyverse)
 #Every row of the matrix is a run of the simulation
 #Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
 
-repeats <- 1000L
+repeats <- 1.5eL
 
 m <- matrix(0L, nrow = repeats, ncol = 3L)
 
