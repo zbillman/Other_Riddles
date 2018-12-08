@@ -3,11 +3,6 @@
 zpb
 December 7, 2018
 
-This code as of now is incorrect
-================================
-
-I naively allowed the situation to exist where Lakkari dies and the subsequent damage event was not rerolled. Back to the drawing board!
-
 The Scenario
 ============
 
@@ -18,9 +13,9 @@ I am using the video <https://www.youtube.com/watch?v=pBGMt28xgvk> as a guide to
 Simulation
 ==========
 
-There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it.
+There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it. I had to write some if() statements that helped clear this up!
 
-Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases. Not completely insignificant.
+Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases if we don't remove them. That's quite a lot in my book.
 
 ``` r
 library(tidyverse)
@@ -40,18 +35,29 @@ library(tidyverse)
 ``` r
 #Column 1 is the Hellfiend, Column 2 is the Lakkari Felhound, Column 3 is the hero
 #Every row of the matrix is a run of the simulation
-#Run 1.5 million repeats of this and then find the # of them that do not have any damage on the hellfiend
+#Run 1.5 million repeats of this and then find the % of them that do not have any damage on the hellfiend
+#Avoid doing >6 damage to the Lakkari Felhound and >5 to the Hellfiend
 
-repeats <- 1.5e6L
+trial <- 1.5e6L
 
-m <- matrix(0L, nrow = repeats, ncol = 3L)
+m <- matrix(0L, nrow = trial, ncol = 3L)
 
-for (trials in 1:repeats){
-  for (j in 1:8) {
-    target <- sample(3, 1)
-    m[trials, target] <- m[trials, target] + 1L
-  }
-}
+for (i in 1:trial){
+    for (attack in 1:8) {
+        target <- sample(1:3, 1)
+        m[i, target] <- m[i, target] + 1 
+        if(m[i, 2] > 6){ 
+            m[i, 2] <- m[i, 2] - 1 
+            newtarget1 <- sample(c(1,3), 1)
+            m[i, newtarget1] <- m[i, newtarget1] + 1 
+            }
+        if(m[i, 1] > 5){
+            m[i, 1] <- m[i, 1] - 1
+            newtarget2 <- sample(c(2,3), 1)
+            m[i, newtarget2] <- m[i, newtarget2] + 1
+            }
+        }   
+    }   
 
 #Put that matrix m into a tibble so we can summarize it and also remove all of the outcomes that aren't possible
 #i.e. all outcomes where Hellfiend takes more than 5 damage or the Lakkari Felhound takes more than 6
@@ -60,8 +66,7 @@ mtibble <- m %>%
   as_tibble(m) %>%
   rename("Hellfiend" = "V1",
          "Lakkari_Felhound" = "V2",
-         "Hero" = "V3") %>%
-  filter(Hellfiend <= 5 & Lakkari_Felhound <= 6) #this is the illegal part. This is really dumb and isn't allowed. You need to figure out how to reroll the situations where Lakkari Felhound takes more than 6 damage and have it only select between Hellfiend and Hero.
+         "Hero" = "V3")
 ```
 
     ## Warning in if (validate) {: the condition has length > 1 and only the first
@@ -69,15 +74,18 @@ mtibble <- m %>%
 
 ``` r
 summarize(mtibble,
-          mean(Hellfiend == 0))
+          pct_win = mean(Hellfiend == 0),
+          max_LF = max(Lakkari_Felhound),
+          max_HF = max(Hellfiend),
+          max_hero = max(Hero))
 ```
 
-    ## # A tibble: 1 x 1
-    ##   `mean(Hellfiend == 0)`
-    ##                    <dbl>
-    ## 1                 0.0383
+    ## # A tibble: 1 x 4
+    ##   pct_win max_LF max_HF max_hero
+    ##     <dbl>  <dbl>  <dbl>    <dbl>
+    ## 1  0.0382      6      5        8
 
 Result
 ======
 
-Looks like in the siuation I simulated (which is surprisingly close to the real situation, BUT ISN'T) there was ~3.85% chance of that happening. Quite lucky! BUT WRONG!
+Looks like there was ~3.8% chance of that happening. Quite lucky!

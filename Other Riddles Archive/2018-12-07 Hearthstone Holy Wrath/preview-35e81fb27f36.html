@@ -28,14 +28,12 @@ body {
 <h1 id="hearthstone-probability">2018-12-07 Hearthstone Probability</h1>
 <p>zpb<br />
 December 7, 2018</p>
-<h1 id="this-code-as-of-now-is-incorrect">This code as of now is incorrect</h1>
-<p>I naively allowed the situation to exist where Lakkari dies and the subsequent damage event was not rerolled. Back to the drawing board!</p>
 <h1 id="the-scenario">The Scenario</h1>
 <p>At 9:18 seconds in this youtube video <a href="https://youtu.be/FcabbroD2mE?t=558" class="uri">https://youtu.be/FcabbroD2mE?t=558</a> the opponent casts a Holy Wrath which sends out 8 bolts that can hit any opposing character. For our hero to win, he needs it to miss his Hellfiend, which has 5 HP. His hero has 24, and his Lakkari Felhound has 6 HP. This is very unlikely, right? Let's run a simulation to find out just how unlikely it is!</p>
 <p>I am using the video <a href="https://www.youtube.com/watch?v=pBGMt28xgvk" class="uri">https://www.youtube.com/watch?v=pBGMt28xgvk</a> as a guide to help me create this simulation. If I struggle too much I'll give up lol, but I think this is a decent place to start.</p>
 <h1 id="simulation">Simulation</h1>
-<p>There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it.</p>
-<p>Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases. Not completely insignificant.</p>
+<p>There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it. I had to write some if() statements that helped clear this up!</p>
+<p>Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases if we don't remove them. That's quite a lot in my book.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)</code></pre></div>
 <pre><code>## -- Attaching packages ------------------------------------------------------------------------------ tidyverse 1.2.1 --
 
@@ -49,18 +47,29 @@ December 7, 2018</p>
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Column 1 is the Hellfiend, Column 2 is the Lakkari Felhound, Column 3 is the hero</span>
 <span class="co">#Every row of the matrix is a run of the simulation</span>
-<span class="co">#Run 1.5 million repeats of this and then find the # of them that do not have any damage on the hellfiend</span>
+<span class="co">#Run 1.5 million repeats of this and then find the % of them that do not have any damage on the hellfiend</span>
+<span class="co">#Avoid doing &gt;6 damage to the Lakkari Felhound and &gt;5 to the Hellfiend</span>
 
-repeats &lt;-<span class="st"> </span><span class="fl">1.</span>5e6L
+trial &lt;-<span class="st"> </span><span class="fl">1.</span>5e6L
 
-m &lt;-<span class="st"> </span><span class="kw">matrix</span>(0L, <span class="dt">nrow =</span> repeats, <span class="dt">ncol =</span> 3L)
+m &lt;-<span class="st"> </span><span class="kw">matrix</span>(0L, <span class="dt">nrow =</span> trial, <span class="dt">ncol =</span> 3L)
 
-<span class="cf">for</span> (trials <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>repeats){
-  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>) {
-    target &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">3</span>, <span class="dv">1</span>)
-    m[trials, target] &lt;-<span class="st"> </span>m[trials, target] <span class="op">+</span><span class="st"> </span>1L
-  }
-}
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>trial){
+    <span class="cf">for</span> (attack <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">8</span>) {
+        target &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">3</span>, <span class="dv">1</span>)
+        m[i, target] &lt;-<span class="st"> </span>m[i, target] <span class="op">+</span><span class="st"> </span><span class="dv">1</span> 
+        <span class="cf">if</span>(m[i, <span class="dv">2</span>] <span class="op">&gt;</span><span class="st"> </span><span class="dv">6</span>){ 
+            m[i, <span class="dv">2</span>] &lt;-<span class="st"> </span>m[i, <span class="dv">2</span>] <span class="op">-</span><span class="st"> </span><span class="dv">1</span> 
+            newtarget1 &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>), <span class="dv">1</span>)
+            m[i, newtarget1] &lt;-<span class="st"> </span>m[i, newtarget1] <span class="op">+</span><span class="st"> </span><span class="dv">1</span> 
+            }
+        <span class="cf">if</span>(m[i, <span class="dv">1</span>] <span class="op">&gt;</span><span class="st"> </span><span class="dv">5</span>){
+            m[i, <span class="dv">1</span>] &lt;-<span class="st"> </span>m[i, <span class="dv">1</span>] <span class="op">-</span><span class="st"> </span><span class="dv">1</span>
+            newtarget2 &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">3</span>), <span class="dv">1</span>)
+            m[i, newtarget2] &lt;-<span class="st"> </span>m[i, newtarget2] <span class="op">+</span><span class="st"> </span><span class="dv">1</span>
+            }
+        }   
+    }   
 
 <span class="co">#Put that matrix m into a tibble so we can summarize it and also remove all of the outcomes that aren't possible</span>
 <span class="co">#i.e. all outcomes where Hellfiend takes more than 5 damage or the Lakkari Felhound takes more than 6</span>
@@ -69,18 +78,20 @@ mtibble &lt;-<span class="st"> </span>m <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">as_tibble</span>(m) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">rename</span>(<span class="st">&quot;Hellfiend&quot;</span> =<span class="st"> &quot;V1&quot;</span>,
          <span class="st">&quot;Lakkari_Felhound&quot;</span> =<span class="st"> &quot;V2&quot;</span>,
-         <span class="st">&quot;Hero&quot;</span> =<span class="st"> &quot;V3&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">filter</span>(Hellfiend <span class="op">&lt;=</span><span class="st"> </span><span class="dv">5</span> <span class="op">&amp;</span><span class="st"> </span>Lakkari_Felhound <span class="op">&lt;=</span><span class="st"> </span><span class="dv">6</span>) <span class="co">#this is the illegal part. This is really dumb and isn't allowed. You need to figure out how to reroll the situations where Lakkari Felhound takes more than 6 damage and have it only select between Hellfiend and Hero.</span></code></pre></div>
+         <span class="st">&quot;Hero&quot;</span> =<span class="st"> &quot;V3&quot;</span>)</code></pre></div>
 <pre><code>## Warning in if (validate) {: the condition has length &gt; 1 and only the first
 ## element will be used</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summarize</span>(mtibble,
-          <span class="kw">mean</span>(Hellfiend <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))</code></pre></div>
-<pre><code>## # A tibble: 1 x 1
-##   `mean(Hellfiend == 0)`
-##                    &lt;dbl&gt;
-## 1                 0.0383</code></pre>
+          <span class="dt">pct_win =</span> <span class="kw">mean</span>(Hellfiend <span class="op">==</span><span class="st"> </span><span class="dv">0</span>),
+          <span class="dt">max_LF =</span> <span class="kw">max</span>(Lakkari_Felhound),
+          <span class="dt">max_HF =</span> <span class="kw">max</span>(Hellfiend),
+          <span class="dt">max_hero =</span> <span class="kw">max</span>(Hero))</code></pre></div>
+<pre><code>## # A tibble: 1 x 4
+##   pct_win max_LF max_HF max_hero
+##     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+## 1  0.0382      6      5        8</code></pre>
 <h1 id="result">Result</h1>
-<p>Looks like in the siuation I simulated (which is surprisingly close to the real situation, BUT ISN'T) there was ~3.85% chance of that happening. Quite lucky! BUT WRONG!</p>
+<p>Looks like there was ~3.8% chance of that happening. Quite lucky!</p>
 
 </body>
 </html>
