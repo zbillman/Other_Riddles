@@ -28,12 +28,13 @@ body {
 <h1 id="hearthstone-probability">2018-12-07 Hearthstone Probability</h1>
 <p>zpb<br />
 December 7, 2018</p>
+<h1 id="this-code-as-of-now-is-incorrect">This code as of now is incorrect</h1>
+<p>I naively allowed the situation to exist where Lakkari dies and the subsequent damage event was not rerolled. Back to the drawing board!</p>
 <h1 id="the-scenario">The Scenario</h1>
 <p>At 9:18 seconds in this youtube video <a href="https://youtu.be/FcabbroD2mE?t=558" class="uri">https://youtu.be/FcabbroD2mE?t=558</a> the opponent casts a Holy Wrath which sends out 8 bolts that can hit any opposing character. For our hero to win, he needs it to miss his Hellfiend, which has 5 HP. His hero has 24, and his Lakkari Felhound has 6 HP. This is very unlikely, right? Let's run a simulation to find out just how unlikely it is!</p>
 <p>I am using the video <a href="https://www.youtube.com/watch?v=pBGMt28xgvk" class="uri">https://www.youtube.com/watch?v=pBGMt28xgvk</a> as a guide to help me create this simulation. If I struggle too much I'll give up lol, but I think this is a decent place to start.</p>
 <h1 id="simulation">Simulation</h1>
-<p>There is something beneficial to this simulation, in that we don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get because it has 8 health! Similarly with the hero having &gt;8 health. Thank god.</p>
-<p>This one is probably just a bit off mathematically because it is including the cases where more than 5 bolts hit the Hellfiend. This is extremely unlikely so I guess I'm just going to ignore these cases.</p>
+<p>There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it.</p>
 <p>Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases. Not completely insignificant.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyverse)</code></pre></div>
 <pre><code>## -- Attaching packages ------------------------------------------------------------------------------ tidyverse 1.2.1 --
@@ -48,7 +49,7 @@ December 7, 2018</p>
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Column 1 is the Hellfiend, Column 2 is the Lakkari Felhound, Column 3 is the hero</span>
 <span class="co">#Every row of the matrix is a run of the simulation</span>
-<span class="co">#Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend</span>
+<span class="co">#Run 1.5 million repeats of this and then find the # of them that do not have any damage on the hellfiend</span>
 
 repeats &lt;-<span class="st"> </span><span class="fl">1.</span>5e6L
 
@@ -69,7 +70,7 @@ mtibble &lt;-<span class="st"> </span>m <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">rename</span>(<span class="st">&quot;Hellfiend&quot;</span> =<span class="st"> &quot;V1&quot;</span>,
          <span class="st">&quot;Lakkari_Felhound&quot;</span> =<span class="st"> &quot;V2&quot;</span>,
          <span class="st">&quot;Hero&quot;</span> =<span class="st"> &quot;V3&quot;</span>) <span class="op">%&gt;%</span>
-<span class="st">  </span><span class="kw">filter</span>(Hellfiend <span class="op">&lt;=</span><span class="st"> </span><span class="dv">5</span> <span class="op">&amp;</span><span class="st"> </span>Lakkari_Felhound <span class="op">&lt;=</span><span class="st"> </span><span class="dv">6</span>)</code></pre></div>
+<span class="st">  </span><span class="kw">filter</span>(Hellfiend <span class="op">&lt;=</span><span class="st"> </span><span class="dv">5</span> <span class="op">&amp;</span><span class="st"> </span>Lakkari_Felhound <span class="op">&lt;=</span><span class="st"> </span><span class="dv">6</span>) <span class="co">#this is the illegal part. This is really dumb and isn't allowed. You need to figure out how to reroll the situations where Lakkari Felhound takes more than 6 damage and have it only select between Hellfiend and Hero.</span></code></pre></div>
 <pre><code>## Warning in if (validate) {: the condition has length &gt; 1 and only the first
 ## element will be used</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summarize</span>(mtibble,
@@ -77,9 +78,9 @@ mtibble &lt;-<span class="st"> </span>m <span class="op">%&gt;%</span>
 <pre><code>## # A tibble: 1 x 1
 ##   `mean(Hellfiend == 0)`
 ##                    &lt;dbl&gt;
-## 1                 0.0387</code></pre>
+## 1                 0.0383</code></pre>
 <h1 id="result">Result</h1>
-<p>Looks like there was ~3.85% chance of that happening. Quite lucky!</p>
+<p>Looks like in the siuation I simulated (which is surprisingly close to the real situation, BUT ISN'T) there was ~3.85% chance of that happening. Quite lucky! BUT WRONG!</p>
 
 </body>
 </html>

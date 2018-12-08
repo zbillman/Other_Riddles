@@ -3,6 +3,11 @@
 zpb
 December 7, 2018
 
+This code as of now is incorrect
+================================
+
+I naively allowed the situation to exist where Lakkari dies and the subsequent damage event was not rerolled. Back to the drawing board!
+
 The Scenario
 ============
 
@@ -13,9 +18,7 @@ I am using the video <https://www.youtube.com/watch?v=pBGMt28xgvk> as a guide to
 Simulation
 ==========
 
-There is something beneficial to this simulation, in that we don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get because it has 8 health! Similarly with the hero having &gt;8 health. Thank god.
-
-This one is probably just a bit off mathematically because it is including the cases where more than 5 bolts hit the Hellfiend. This is extremely unlikely so I guess I'm just going to ignore these cases.
+There is something deceiving in this simulation. I was naive and though that I don't need to worry about having to set limits on how high we can let the Lakkari Felhound's damage get, but I was wrong because it has 6 health. Also Similarly with the hero having &gt;8 health. Doggone it.
 
 Using summarize(mtibble, mean(Hellfiend &gt;= 6)) these are 1.97% of cases. Not completely insignificant.
 
@@ -37,7 +40,7 @@ library(tidyverse)
 ``` r
 #Column 1 is the Hellfiend, Column 2 is the Lakkari Felhound, Column 3 is the hero
 #Every row of the matrix is a run of the simulation
-#Run 1 million repeats of this and then find the # of them that do not have any damage on the hellfiend
+#Run 1.5 million repeats of this and then find the # of them that do not have any damage on the hellfiend
 
 repeats <- 1.5e6L
 
@@ -58,7 +61,7 @@ mtibble <- m %>%
   rename("Hellfiend" = "V1",
          "Lakkari_Felhound" = "V2",
          "Hero" = "V3") %>%
-  filter(Hellfiend <= 5 & Lakkari_Felhound <= 6)
+  filter(Hellfiend <= 5 & Lakkari_Felhound <= 6) #this is the illegal part. This is really dumb and isn't allowed. You need to figure out how to reroll the situations where Lakkari Felhound takes more than 6 damage and have it only select between Hellfiend and Hero.
 ```
 
     ## Warning in if (validate) {: the condition has length > 1 and only the first
@@ -72,9 +75,9 @@ summarize(mtibble,
     ## # A tibble: 1 x 1
     ##   `mean(Hellfiend == 0)`
     ##                    <dbl>
-    ## 1                 0.0387
+    ## 1                 0.0383
 
 Result
 ======
 
-Looks like there was ~3.85% chance of that happening. Quite lucky!
+Looks like in the siuation I simulated (which is surprisingly close to the real situation, BUT ISN'T) there was ~3.85% chance of that happening. Quite lucky! BUT WRONG!
